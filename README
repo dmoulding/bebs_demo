@@ -1,0 +1,41 @@
+Boilermake/External Build System (BEBS) Demo
+============================================
+
+This is an example that demonstrates how to interface a
+Boilermake-based build system with an external build system.
+
+This demo contains an "app" which is just a very short program that
+links with two static libraries (libfoo.a and libbar.a). The two
+static libraries are produced by the external build system, which is
+located in the "foobar" directory. Pretty much all of the makefile
+code that interfaces with the external build system is in "foobar.mk".
+That's where most of the interesting stuff is. Then there's also one
+line in "app/app.mk" that tells Boilermake that "app" depends on build
+products that are produced by the external build system.
+
+To test how it works, first just run "make". Notice that the app's
+source is compiled, the two libraries are compiled and archived, and
+then the final "bin/app" executable is linked against the two
+libraries. Then run "make" again and notice that nothing gets rebuilt
+(everything is still up-to-date). Every time "make" is run, Boilermake
+invokes the external build system to give it a chance to update
+anything that's out-of-date. Next, do "touch foobar/foo.c" and then
+run "make" again. This time, the external build system will recompile
+"foobar/foo.c" and rearchive "libfoo.a", then the Boilermake build
+system will relink "bin/app". Finally, do "make clean" and see that
+both "bin/app" and the external libraries get cleaned.
+
+The important things to note are:
+
+    - Nothing gets rebuilt unless it needs to be: bin/app doesn't get
+      relinked unless the externally-built libraries are updated.
+
+    - If any of the final build products of the external build system
+      are updated, then "bin/app" will always be relinked, as it
+      should be.
+
+In this demonstration, the external build system happens to be another
+Boilermake-based build system. But the same technique applies
+regardless of what the other build system is based on (it could be
+some other make-based system, or it could be SCons, cmake, or any of
+those other goofy build systems).
